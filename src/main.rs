@@ -1,10 +1,11 @@
 use std::path::PathBuf;
+use std::process::{Child, Command, Stdio, Output};
 use clap::Clap;
 
 #[derive(Clap, Debug)]
 #[clap(name = "show-waifu", about = "View random anime fanart in your terminal!")]
 struct Cli {
-    /// Use a locally stored image path
+    /// Use a path to a locally stored image
     #[clap(short, long, parse(from_os_str), value_hint = clap::ValueHint::FilePath)]
     output: Option<PathBuf>,
 
@@ -30,10 +31,36 @@ struct Cli {
 fn main() {
     let args = Cli::parse();
 
-    let mut image = std::process::Command::new("sh");
-
     if let Some(url) = args.url {
-            let command = format!{"curl -s {} | viu -w 60 -", url};
-            image.arg(command).output().expect("Error: Didn't work.");
+        let value = use_viu(url);
+        eprintln!("{}", String::from_utf8_lossy(&value.stderr));
     }
+
+}
+
+fn use_curl(url: String) -> Child {
+    let cmd_curl = match Command::new("curl")
+            .arg(url)
+            .stdout(Stdio::piped())
+            .spawn() {
+                Err(reason) => panic!("Couldn't spawn curl: {}", reason),
+                Ok(process) => process,  
+            };
+    
+    cmd_curl
+}
+
+fn use_viu(image_url: String) -> Output {
+    let curl = use_curl(image_url);
+
+    let cmd_viu = Command::new("kitty")
+        .arg("kitten")
+        .arg("icat")
+        .stdin(curl.stdout.unwrap())
+        .output()
+        .unwrap_or_else(|reason| { 
+            panic!("Couldn't spawn viu: {}", reason)
+        });
+
+    cmd_viu
 }
