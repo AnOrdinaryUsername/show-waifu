@@ -1,13 +1,17 @@
 use std::path::PathBuf;
-use std::process::{Child, Command, Stdio, Output};
+use std::process::{Command, Stdio};
 use clap::Clap;
 
 #[derive(Clap, Debug)]
 #[clap(name = "show-waifu", about = "View random anime fanart in your terminal!")]
 struct Cli {
+    /// Show data related to image (tags, width, height)
+    #[clap(short, long)]
+    details: bool,
+
     /// Use a path to a locally stored image
     #[clap(short, long, parse(from_os_str), value_hint = clap::ValueHint::FilePath)]
-    output: Option<PathBuf>,
+    file: Option<PathBuf>,
 
     /// Use a link to an image
     #[clap(short, long)]
@@ -32,35 +36,36 @@ fn main() {
     let args = Cli::parse();
 
     if let Some(url) = args.url {
-        let value = use_viu(url);
-        eprintln!("{}", String::from_utf8_lossy(&value.stderr));
+        show_image_with_url(url);
+    } else if let Some(file) = args.file {
+        show_image_with_path(file);
     }
-
 }
 
-fn use_curl(url: String) -> Child {
-    let cmd_curl = match Command::new("curl")
-            .arg(url)
+
+fn show_image_with_url(image_url: String) -> () {
+    let curl = match Command::new("curl")
+            .arg(image_url)
             .stdout(Stdio::piped())
             .spawn() {
                 Err(reason) => panic!("Couldn't spawn curl: {}", reason),
                 Ok(process) => process,  
             };
-    
-    cmd_curl
+
+    match Command::new("viu")
+        .arg("-")
+        .stdin(curl.stdout.unwrap())
+        .status() {
+            Err(reason) => panic!("Couldn't spawn viu: {}", reason),
+            Ok(process) => process,  
+        };
 }
 
-fn use_viu(image_url: String) -> Output {
-    let curl = use_curl(image_url);
-
-    let cmd_viu = Command::new("kitty")
-        .arg("kitten")
-        .arg("icat")
-        .stdin(curl.stdout.unwrap())
-        .output()
-        .unwrap_or_else(|reason| { 
-            panic!("Couldn't spawn viu: {}", reason)
-        });
-
-    cmd_viu
+fn show_image_with_path(image_path: PathBuf) -> () {
+    match Command::new("viu")
+        .arg(image_path)
+        .status() {
+            Err(reason) => panic!("Couldn't spawn viu: {}", reason),
+            Ok(process) => process,  
+        };
 }
