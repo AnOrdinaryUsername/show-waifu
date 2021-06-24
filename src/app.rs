@@ -5,7 +5,7 @@ use clap::Clap;
 
 #[derive(Clap, Debug)]
 #[clap(name = "show-waifu", about = "View random anime fanart in your terminal!")]
-pub struct Cli {
+struct Cli {
     /// Resize the image to a provided height
     #[clap(short, long)]
     height: Option<u16>,
@@ -33,13 +33,17 @@ enum Subcommand {
 /// View a random image from Safebooru
 #[derive(Clap, Debug)]
 struct Random {
-    /// Show data related to image (url, width, height, tags)
+    /// Show data related to image (url, rating, width, height, tags)
     #[clap(short, long)]
     details: bool,
 
+    /// Allow displaying suggestive images
+    #[clap(short, long)]
+    suggestive: bool,
+
     /// Search for an image based on Safebooru tags.
     /// Pass as a string separated by spaces or commas.         
-    /// You can also use negation with minus (-)
+    /// Look at Safebooru cheatsheet for full list of search options
     #[clap(short, long)]
     tags: Option<String>,
 }
@@ -65,8 +69,6 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     if let Some(command) = args.command {
         match command {
-            // TODO: Check for Some() and None() (Custom error)
-            // for each subcommand
             Subcommand::Random(options) => {
                 result = show_random_image(options.tags);
             },
@@ -84,14 +86,6 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     result
 }
 
-
-fn grab_random_image() -> String {
-    // No key needed for access
-    let api = "https://safebooru.org/index.php?page=dapi&s=post&q=index&limit=100&json=1";
-    let api = String::from(api);
-
-    api
-}
 
 
 fn show_random_image(tags: Option<String>) -> Result<(), Box<dyn std::error::Error>> {
