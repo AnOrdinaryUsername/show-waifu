@@ -32,20 +32,20 @@ enum Subcommand {
 
 /// View a random image from Safebooru
 #[derive(Clap, Debug)]
-struct Random {
+pub struct Random {
     /// Show data related to image (url, rating, width, height, tags)
     #[clap(short, long)]
-    details: bool,
+    pub details: bool,
 
-    /// Allow displaying suggestive images
+    /// Display only suggestive images
     #[clap(short, long)]
-    suggestive: bool,
+    pub suggestive: bool,
 
     /// Search for an image based on Safebooru tags.
     /// Pass as a string separated by spaces or commas.         
-    /// Look at Safebooru cheatsheet for full list of search options
+    /// Look at Safebooru;s cheatsheet for a full list of search options
     #[clap(short, long)]
-    tags: Option<String>,
+    pub tags: Option<String>,
 }
 
 /// Pass a link for viewing
@@ -70,7 +70,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(command) = args.command {
         match command {
             Subcommand::Random(options) => {
-                result = show_random_image(options.tags);
+                result = show_random_image(options);
             },
             Subcommand::File(file) => { 
                 result = show_image_with_path(file.file_path);
@@ -80,22 +80,19 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
             },
         };
     } else {
-        result = show_random_image(None);
+        std::process::exit(1)
     }
 
     result
 }
 
+fn show_random_image(args: Random) -> Result<(), Box<dyn std::error::Error>> {
+    let image_url = crate::api::grab_random_image(args);
+    let image_url = String::from(image_url);
 
 
-fn show_random_image(tags: Option<String>) -> Result<(), Box<dyn std::error::Error>> {
-    // let url = String::from(grab_random_image());
-
-    let url = String::from("https://i.redd.it/h7dae4o0uk461.jpg");
-
-    show_image_with_url(url)
+    show_image_with_url(image_url)
 }
-
 
 fn show_image_with_url(image_url: String) -> Result<(), Box<dyn std::error::Error>> {
     let curl = Command::new("curl")

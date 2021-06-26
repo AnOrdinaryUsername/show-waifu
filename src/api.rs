@@ -1,20 +1,66 @@
 use regex::Regex;
-use std::collections::HashMap;
+use serde::Deserialize;
+use reqwest::Error;
+use rand::distributions::{Distribution, Uniform};
 
-pub struct RandomArgs {
-    has_details: bool,
-    has_suggestive_content: bool,
-    tags: String,
+use crate::app::Random;
+
+
+pub fn grab_random_image(options: Random) -> String {
+    let data = match fetch_api_data(&options) {
+        Ok(json_data) => json_data,
+        Err(_) => {
+            eprintln!("{}", "Couldn't fetch image. Try checking your tags?");
+            std::process::exit(1);
+        },
+    };
+
+    let mut rng = rand::thread_rng();
+    let random_number = Uniform::from(0..data.len());
+    let index = random_number.sample(&mut rng);
+
+    let image = &data[index];
+
+    let image_url = format!("https://safebooru.org//images/{dir}/{img}?{id}",
+                        dir = image.directory,
+                        img = image.image,
+                        id = image.id
+                    );
+    
+    if options.details {
+        let ImageData { rating, width, height, tags, .. } = image;
+        let details = ImageInfo {
+            url: &image_url,
+            rating: rating,
+            width: *width,
+            height: *height,
+            tags: tags.split(' ').collect(),
+        };
+
+        print_image_details(details)
+    }
+    
+    image_url
 }
 
+fn evaluate_arguments(options: &Random) -> String {
+    let Random { suggestive, tags, .. } = options;
 
-fn evaluate_arguments(options: RandomArgs) -> String {
-    let RandomArgs { has_suggestive_content, tags, .. } = options;
+    let empty = String::from("");
+
+    let tags = match tags {
+        Some(search_items) => search_items,
+        _ => &empty,
+    };
     
-    let search_tags = String::from(tags);
+    let mut search_tags = String::from(tags);
 
-    if has_suggestive_content {
-        search_tags.push_str("%20rating:suggestive");
+    if *suggestive {
+        if search_tags.len() == 0 {
+            search_tags.push_str("rating:questionable");
+        } else {
+            search_tags.push_str("%20rating:questionable");
+        }
     }
 
     let extra_spaces = Regex::new(r"\s{2,}").unwrap();
@@ -27,78 +73,51 @@ fn evaluate_arguments(options: RandomArgs) -> String {
 
     let tags = format!("&tags={}", search_tags);
     // No key needed for access
-    let api = String::from("https://safebooru.org/index.php?page=dapi&s=post&q=index&limit=100&json=1");
+    let mut api = String::from("https://safebooru.org/index.php?page=dapi&s=post&q=index&limit=100&json=1");
     api.push_str(&tags);
 
     api
 }
 
-// Maybe return all json images instead of just 1 specific image?
-fn fetch_api_data(options: RandomArgs) -> ApiData {
-    let api = evaluate_arguments(options);
+#[derive(Deserialize, Debug)]
+struct ImageData {
+    // Image URL
+    directory: String,
+    image: String,
+    id: u32,
 
-    let res = match reqwest::blocking::get(api) {
-        Ok(res) => {
-            res.json::<HashMap<String, String>>()
-        },
-        Err(err) => { 
-            eprintln!("{}", err);
-            std::process::exit(1);
-        }
-    };
+    // Image details
+    rating: String,
+    width: u32,
+    height: u32,
+    tags: String,
+}
 
+fn fetch_api_data(options: &Random) -> Result<Vec<ImageData>, Error> {
+    let request_url = evaluate_arguments(options);
 
-    // TODO: Fix below later
-    let res = match res {
-        Ok(data) => data,
-        Err(_) => std::process::exit(1),
-    };
+    let response = reqwest::blocking::get(&request_url)?;
+    let data: Vec<ImageData> = response.json()?;
 
-    let directory = res.get(&"directory");
+    Ok(data)
+}
 
-    ApiData {
-        directory: res.directory,
-        image: res.image,
-        id: res.image,
-        image_info: None,
-    }
+struct ImageInfo<'a> {
+    url: &'a str,
+    rating: &'a str,
+    width: u32,
+    height: u32,
+    tags: Vec<&'a str>,
 }
 
 fn print_image_details(info: ImageInfo) -> () {
-    let ImageInfo { url, width, height, tags } = info;
+    let ImageInfo { url, rating, width, height, tags } = info;
 
-    println!("{}", url);
-}
-
-fn grab_random_image(options: RandomArgs) -> String{
-    let data = fetch_api_data(options);
-    let ApiData { directory, image, id, image_info } = data;
-
-    let image_url = format!("https://safebooru.org//images/{dir}/{img}?{id}",
-                        dir = directory,
-                        img = image,
-                        id = id
-                    );
-    
-    if options.has_details {
-        let Some(image_info) = image_info;
-        print_image_details(image_info)
-    }
-    
-
-    image_url
-}
-
-struct ApiData {
-    directory: String,
-    image: String,
-    id: String,
-    image_info: Option<ImageInfo>,
-}
-
-struct ImageInfo {
-    url: String,
-    width: u32,
-    height: u32,
-    tags: Vec<String>,
+    // TODO: Add colors and/or emojis.
+    // Also maybe use io::Buffwriter for better performance.
+    // https://rust-cli.github.io/book/tutorial/output.html#a-note-on-printing-performance
+    println!("Link: {}", url);
+    println!("Rating: {}", rating);
+    println!("Dimensions: {} x {}", width, height);
+    println!("Tags: {:?}", tags);
 }
