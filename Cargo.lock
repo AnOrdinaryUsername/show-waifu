@@ -1274,8 +1274,10 @@ name = "show-waifu"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "atty",
  "clap",
  "colored",
+ "image",
  "rand",
  "regex",
  "reqwest",
