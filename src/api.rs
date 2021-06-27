@@ -10,7 +10,14 @@ pub fn grab_random_image(options: Random) -> String {
     let data = match fetch_api_data(&options) {
         Ok(json_data) => json_data,
         Err(_) => {
-            eprintln!("{}", "Couldn't fetch image. Try checking your tags?");
+            if options.suggestive {
+                eprintln!("{}", "Couldn't fetch API data. There's probably no \
+                            suggestive images associated with your tag(s).")
+            } else {
+                eprintln!("{}", "Couldn't fetch API data. Try checking your \
+                            tag(s) for errors.");
+            }
+
             std::process::exit(1);
         },
     };
@@ -50,7 +57,7 @@ fn evaluate_arguments(options: &Random) -> String {
 
     let tags = match tags {
         Some(search_items) => search_items,
-        _ => &empty,
+        None => &empty,
     };
     
     let mut search_tags = String::from(tags);
@@ -68,7 +75,7 @@ fn evaluate_arguments(options: &Random) -> String {
 
     // Remove excess spaces (2 or more)
     let search_tags = extra_spaces.replace_all(&search_tags, "");
-    // Replace commas and spaces with %
+    // Replace commas and spaces with %20
     let search_tags = delimiters.replace_all(&search_tags, "%20");
 
     let tags = format!("&tags={}", search_tags);
