@@ -37,7 +37,7 @@ pub struct Random {
     #[clap(short, long)]
     pub details: bool,
 
-    /// Display only suggestive images
+    /// Only display images with suggestive content
     #[clap(short, long)]
     pub suggestive: bool,
 
