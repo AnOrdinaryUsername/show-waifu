@@ -2,6 +2,39 @@
 
 A command-line app using the Safebooru API to show SFW-ish anime fanart in your terminal.
 
+## Installation
+
+Download `show-waifu-0.1.0.tar.gz` from releases and extract it.
+
+In the command line
+```sh
+tar -xf show-waifu-0.1.0.tar.gz
+```
+
+Move the show-waifu executable into your bin
+```sh
+# If ~/bin doesn't exist, create it using the following
+mkdir -p ~/bin
+mv show-waifu ~/bin
+```
+
+Test it to see if it works
+```sh
+~/bin/show-waifu
+```
+
+If ~/bin isn't in your path, add ~/bin to $PATH and reload Bash configuration
+```sh
+echo 'export PATH=~/bin:$PATH' >> ~/.bash_profile
+source ~/.bash_profile
+```
+
+Test it again and if it works, it should output an image in your terminal
+```sh
+show-waifu
+```
+
+
 ### Example usage
 
 Read from stdin and show an image
@@ -11,7 +44,7 @@ curl -s https://pbs.twimg.com/media/DoWo3unU4AA2etL\?format\=jpg\&name\=large | 
 
 Search for a specific image based on tags and print details
 ```sh
-show-waifu --details random --tags="ncr_veteran_ranger night~" 
+show-waifu random --details --tags="ncr_veteran_ranger night~" 
 ```
 
 Use a local file and change its height for viewing
