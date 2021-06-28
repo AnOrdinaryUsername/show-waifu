@@ -1,10 +1,13 @@
-use std::path::PathBuf;
-use viuer::{print_from_file, print};
-use clap::Clap;
 use atty::Stream;
+use clap::Clap;
+use std::path::PathBuf;
+use viuer::{print, print_from_file};
 
 #[derive(Clap, Debug)]
-#[clap(name = "show-waifu", about = "View random anime fanart in your terminal!")]
+#[clap(
+    name = "show-waifu",
+    about = "View random anime fanart in your terminal!"
+)]
 struct Cli {
     /// Resize the image to a provided height
     #[clap(short, long)]
@@ -56,7 +59,7 @@ struct Url {
 
 /// View an image from your file system
 #[derive(Clap, Debug)]
- struct File {
+struct File {
     #[clap(parse(from_os_str), value_hint = clap::ValueHint::FilePath)]
     file_path: PathBuf,
 }
@@ -84,13 +87,13 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         match command {
             Subcommand::Random(options) => {
                 result = show_random_image(options, config);
-            },
-            Subcommand::File(file) => { 
+            }
+            Subcommand::File(file) => {
                 result = show_image_with_path(file.file_path, config);
-            },
+            }
             Subcommand::Url(url) => {
                 result = show_image_with_url(url.image_url, config);
-            },
+            }
         };
     } else {
         let default_options = Random {
@@ -105,14 +108,18 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     result
 }
 
-fn show_random_image(args: Random, config: viuer::Config) -> Result<(), Box<dyn std::error::Error>> {
+fn show_random_image(
+    args: Random,
+    config: viuer::Config,
+) -> Result<(), Box<dyn std::error::Error>> {
     let image_url = crate::api::grab_random_image(args);
-    let image_url = String::from(image_url);
-
     show_image_with_url(image_url, config)
 }
 
-fn show_image_with_url(image_url: String, config: viuer::Config) -> Result<(), Box<dyn std::error::Error>> {
+fn show_image_with_url(
+    image_url: String,
+    config: viuer::Config,
+) -> Result<(), Box<dyn std::error::Error>> {
     let image_bytes = reqwest::blocking::get(&image_url)?.bytes()?;
     let image = image::load_from_memory(&image_bytes)?;
 
@@ -121,7 +128,10 @@ fn show_image_with_url(image_url: String, config: viuer::Config) -> Result<(), B
     Ok(())
 }
 
-fn show_image_with_path(image_path: PathBuf, config: viuer::Config) -> Result<(), Box<dyn std::error::Error>> {
+fn show_image_with_path(
+    image_path: PathBuf,
+    config: viuer::Config,
+) -> Result<(), Box<dyn std::error::Error>> {
     print_from_file(image_path, &config)?;
 
     Ok(())
@@ -133,10 +143,10 @@ fn show_image_from_stdin(config: viuer::Config) -> Result<(), Box<dyn std::error
     let stdin = stdin();
     let mut handle = stdin.lock();
 
-    let mut buf: Vec<u8> = Vec::new();
-    let _ = handle.read_to_end(&mut buf)?;
+    let mut buffer: Vec<u8> = Vec::new();
+    let _ = handle.read_to_end(&mut buffer)?;
 
-    let image = image::load_from_memory(&buf)?;
+    let image = image::load_from_memory(&buffer)?;
     print(&image, &config)?;
 
     Ok(())
