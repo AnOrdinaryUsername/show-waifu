@@ -1,3 +1,4 @@
+use colored::Colorize;
 use rand::distributions::{Distribution, Uniform};
 use regex::Regex;
 use reqwest::Error;
@@ -8,16 +9,19 @@ use crate::app::Random;
 pub fn grab_random_image(options: Random) -> String {
     let data = match fetch_api_data(&options) {
         Ok(json_data) => json_data,
-        Err(_) => {
+        Err(error) => {
+            eprintln!("{}\n", error);
             if options.suggestive {
-                eprintln!(
-                    "Couldn't fetch API data. There's probably no \
-                            suggestive images associated with your tag(s)."
-                )
+                println!(
+                    "{}: Couldn't fetch API data. There's probably no \
+                            suggestive images associated with your tag(s).",
+                    "help".green()
+                );
             } else {
-                eprintln!(
-                    "Couldn't fetch API data. Try checking your \
-                            tag(s) for errors."
+                println!(
+                    "{}: Couldn't fetch API data. Try checking your \
+                            tag(s) for errors.",
+                    "help".green()
                 );
             }
 
@@ -46,6 +50,7 @@ pub fn grab_random_image(options: Random) -> String {
             tags,
             ..
         } = image;
+
         let details = ImageInfo {
             url: &image_url,
             rating,
@@ -54,7 +59,17 @@ pub fn grab_random_image(options: Random) -> String {
             tags: tags.split(' ').collect(),
         };
 
-        print_image_details(details)
+        match print_image_details(details) {
+            Ok(_) => (),
+            Err(error) => {
+                eprintln!("{}\n", error);
+                println!(
+                    "{}: There was an error when printing the tags. Please try again later.",
+                    "help".green()
+                );
+                std::process::exit(1);
+            }
+        };
     }
 
     image_url
@@ -65,11 +80,9 @@ fn evaluate_arguments(options: &Random) -> String {
         suggestive, tags, ..
     } = options;
 
-    let empty = String::from("");
-
     let tags = match tags {
         Some(search_items) => search_items,
-        None => &empty,
+        None => "",
     };
 
     let mut search_tags = String::from(tags);
@@ -130,7 +143,9 @@ struct ImageInfo<'a> {
     tags: Vec<&'a str>,
 }
 
-fn print_image_details(info: ImageInfo) {
+fn print_image_details(info: ImageInfo) -> Result<(), Box<dyn std::error::Error>> {
+    use std::io::{self, Write};
+
     let ImageInfo {
         url,
         rating,
@@ -139,11 +154,23 @@ fn print_image_details(info: ImageInfo) {
         tags,
     } = info;
 
-    // TODO: Add colors and/or emojis.
-    // Also maybe use io::Buffwriter for better performance.
-    // https://rust-cli.github.io/book/tutorial/output.html#a-note-on-printing-performance
-    println!("Link: {}", url);
-    println!("Rating: {}", rating);
-    println!("Dimensions: {} x {}", width, height);
-    println!("Tags: {:?}", tags);
+    println!("✉️ {title}: {}", url, title = "Link".cyan());
+    println!("⚖️ {title}: {}", rating, title = "Rating".cyan());
+    println!(
+        "📐 {title}: {w} x {h}",
+        title = "Dimensions".cyan(),
+        w = width,
+        h = height
+    );
+
+    let stdout = io::stdout();
+    let lock = stdout.lock();
+    let mut buffer = io::BufWriter::new(lock);
+
+    write!(buffer, "🏷️ {}:", "Tags".cyan())?;
+    tags.iter().try_for_each(|tag| write!(buffer, " {}", tag))?;
+
+    writeln!(buffer)?;
+
+    Ok(())
 }
