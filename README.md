@@ -10,11 +10,13 @@ Download `show-waifu-0.1.0.tar.gz` from releases and extract it using
 either a GUI or the command line.
 
 If your using the command line run
+
 ```sh
 tar -xf show-waifu-0.1.0.tar.gz
 ```
 
 Move the `show-waifu` executable into your bin
+
 ```sh
 # If ~/bin doesn't exist, create it using the following
 mkdir -p ~/bin
@@ -22,36 +24,41 @@ mv show-waifu ~/bin
 ```
 
 Test it to see if it works, it should output an image in your terminal
+
 ```sh
 ~/bin/show-waifu
 ```
 
 To make `show-waifu` available everywhere on the command line,
 add ~/bin to $PATH and reload the Bash configuration
+
 ```sh
 echo 'export PATH=~/bin:$PATH' >> ~/.bash_profile
 source ~/.bash_profile
 ```
 
-Test it again and if it works, your all set to use it!
+Test it again and if it works, you're all set to use it!
+
 ```sh
 show-waifu
 ```
 
-
 ### Example usage
 
 Read from stdin and show an image
+
 ```sh
 curl -s https://pbs.twimg.com/media/DoWo3unU4AA2etL\?format\=jpg\&name\=large | show-waifu
 ```
 
 Search for a specific image based on tags, and print details
+
 ```sh
-show-waifu random --details --tags="ncr_veteran_ranger night~" 
+show-waifu random --details --tags="ncr_veteran_ranger night~"
 ```
 
 Use a local file and change its height for viewing
+
 ```sh
 show-waifu --height 10 file ~/Pictures/doge.jpg
 ```
