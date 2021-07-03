@@ -6,10 +6,10 @@ A command-line app using the Safebooru API to show SFW-ish anime fanart in your 
 
 ## Installation
 
-Download `show-waifu-0.1.0.tar.gz` from releases and extract it using
+Download `show-waifu-0.2.0.tar.gz` from releases and extract it using
 either a GUI or the command line.
 
-If your using the command line run
+If you're using the command line run
 
 ```sh
 tar -xf show-waifu-0.1.0.tar.gz
