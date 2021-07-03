@@ -1,7 +1,14 @@
 [package]
 name = "show-waifu"
-version = "0.1.0"
+description = "View random anime fanart in your terminal"
+version = "0.2.0"
 authors = ["AnOrdinaryUsername <kylemasa2@gmail.com>"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+homepage = "https://github.com/AnOrdinaryUsername/show-waifu"
+repository = "https://github.com/AnOrdinaryUsername/show-waifu"
+keywords = ["cli", "search", "anime", "terminal", "waifu"]
+categories = ["command-line-utilities"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
