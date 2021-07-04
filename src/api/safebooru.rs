@@ -4,17 +4,17 @@ use regex::Regex;
 use reqwest::Error;
 use serde::Deserialize;
 
-use crate::app::Random;
+use crate::app::Safebooru;
 
-pub fn grab_random_image(options: Random) -> String {
+pub fn grab_random_image(options: Safebooru) -> String {
     let data = match fetch_api_data(&options) {
         Ok(json_data) => json_data,
         Err(error) => {
             eprintln!("{}\n", error);
-            if options.suggestive {
+            if options.questionable {
                 println!(
                     "{}: Couldn't fetch API data. There's probably no \
-                            suggestive images associated with your tag(s).",
+                            questionable images associated with your tag(s).",
                     "help".green()
                 );
             } else {
@@ -75,9 +75,9 @@ pub fn grab_random_image(options: Random) -> String {
     image_url
 }
 
-fn evaluate_arguments(options: &Random) -> String {
-    let Random {
-        suggestive, tags, ..
+fn evaluate_arguments(options: &Safebooru) -> String {
+    let Safebooru {
+        questionable, tags, ..
     } = options;
 
     let tags = match tags {
@@ -87,7 +87,7 @@ fn evaluate_arguments(options: &Random) -> String {
 
     let mut search_tags = String::from(tags);
 
-    if *suggestive {
+    if *questionable {
         if search_tags.is_empty() {
             search_tags.push_str("rating:questionable");
         } else {
@@ -126,7 +126,7 @@ struct ImageData {
     tags: String,
 }
 
-fn fetch_api_data(options: &Random) -> Result<Vec<ImageData>, Error> {
+fn fetch_api_data(options: &Safebooru) -> Result<Vec<ImageData>, Error> {
     let request_url = evaluate_arguments(options);
 
     let response = reqwest::blocking::get(&request_url)?;
