@@ -1,17 +1,18 @@
 use colored::Colorize;
 use rand::distributions::{Distribution, Uniform};
-use regex::Regex;
 use reqwest::Error;
 use serde::Deserialize;
 
+use crate::api::reformat_search_tags;
 use crate::app::Safebooru;
 
-pub fn grab_random_image(options: Safebooru) -> String {
-    let data = match fetch_api_data(&options) {
+pub fn grab_random_image(args: Safebooru) -> String {
+    let request_url = evaluate_arguments(&args);
+    let data = match fetch_api_data(request_url) {
         Ok(json_data) => json_data,
         Err(error) => {
             eprintln!("{}\n", error);
-            if options.questionable {
+            if args.questionable {
                 println!(
                     "{}: Couldn't fetch API data. There's probably no \
                             questionable images associated with your tag(s).",
@@ -42,7 +43,7 @@ pub fn grab_random_image(options: Safebooru) -> String {
         id = image.id
     );
 
-    if options.details {
+    if args.details {
         let ImageData {
             rating,
             width,
@@ -69,41 +70,30 @@ pub fn grab_random_image(options: Safebooru) -> String {
                 );
                 std::process::exit(1);
             }
-        };
+        }
     }
 
     image_url
 }
 
-fn evaluate_arguments(options: &Safebooru) -> String {
+fn evaluate_arguments(args: &Safebooru) -> String {
     let Safebooru {
         questionable, tags, ..
-    } = options;
+    } = args;
 
     let tags = match tags {
         Some(search_items) => search_items,
         None => "",
     };
 
-    let mut search_tags = String::from(tags);
+    let search_tags = String::from(tags);
+    let mut tags = reformat_search_tags(search_tags);
 
     if *questionable {
-        if search_tags.is_empty() {
-            search_tags.push_str("rating:questionable");
-        } else {
-            search_tags.push_str("%20rating:questionable");
-        }
+        tags.push_str("%20rating:questionable");
     }
 
-    let extra_spaces = Regex::new(r"\s{2,}").unwrap();
-    let delimiters = Regex::new(r"[,\s]").unwrap();
-
-    // Remove excess spaces (2 or more)
-    let search_tags = extra_spaces.replace_all(&search_tags, "");
-    // Replace commas and spaces with %20
-    let search_tags = delimiters.replace_all(&search_tags, "%20");
-
-    let tags = format!("&tags={}", search_tags);
+    let tags = format!("&tags={}", tags);
     // No key needed for access
     let mut api =
         String::from("https://safebooru.org/index.php?page=dapi&s=post&q=index&limit=100&json=1");
@@ -126,10 +116,8 @@ struct ImageData {
     tags: String,
 }
 
-fn fetch_api_data(options: &Safebooru) -> Result<Vec<ImageData>, Error> {
-    let request_url = evaluate_arguments(options);
-
-    let response = reqwest::blocking::get(&request_url)?;
+fn fetch_api_data(url: String) -> Result<Vec<ImageData>, Error> {
+    let response = reqwest::blocking::get(&url)?;
     let data: Vec<ImageData> = response.json()?;
 
     Ok(data)
