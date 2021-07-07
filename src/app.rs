@@ -5,9 +5,7 @@ use std::path::PathBuf;
 use viuer::{print, print_from_file};
 
 #[derive(Clap, Debug)]
-#[clap(
-    name = "show-waifu",
-    about = "View random anime fanart in your terminal!
+#[clap(about = "View random anime fanart in your terminal!
 
     ┏━━ Rating Colors ━━━━━━┓
     ┃                       ┃  
@@ -18,8 +16,7 @@ use viuer::{print, print_from_file};
     ┗━━━━━━━━━━━━━━━━━━━━━━━┛
     
 NOTE: Each rating has a different meaning depending on site. See
-the respective subcommand's help for more details."
-)]
+the respective subcommand's help for more details.")]
 struct Cli {
     /// Resize the image to a provided height
     #[clap(short, long)]
@@ -48,7 +45,7 @@ enum Subcommand {
     File(File),
 }
 
-/// View a random image from Safebooru
+/// Look at random images from Safebooru
 #[derive(Clap, Debug)]
 pub struct Safebooru {
     /// Show data related to image (url, rating, dimensions, tags)
@@ -66,7 +63,7 @@ pub struct Safebooru {
     pub tags: Option<String>,
 }
 
-/// View a random image from Danbooru
+/// Look at random images from Danbooru
 #[derive(Clap, Debug)]
 pub struct Danbooru {
     /// Show data related to image (artist, source, character, url, rating, dimensions, tags)
@@ -90,6 +87,14 @@ pub struct Danbooru {
     /// Look at Danbooru's cheatsheet for a full list of search options
     #[clap(short, long)]
     pub tags: Option<String>,
+
+    /// Set your Danbooru username for authentication
+    #[clap(short, long, requires("key"))]
+    pub username: Option<String>,
+
+    /// Set your Danbooru API key for authentication
+    #[clap(short, long, requires("username"))]
+    pub key: Option<String>,
 }
 
 /// View an image from a url
