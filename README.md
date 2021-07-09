@@ -45,7 +45,7 @@ show-waifu
 
 ## Danbooru Authentication
 
-Depending on your account level, authenticating comes with benefits. If you
+Depending on your account level, authenticating comes with certain benefits. If you
 have a Danbooru account that is Gold-level or above (see [Danbooru User levels](https://danbooru.donmai.us/wiki_pages/help:users) for 
 more information), you can authenticate by doing the following:
 
@@ -59,6 +59,24 @@ more information), you can authenticate by doing the following:
     echo 'export DANBOORU_USERNAME="your-name-here"' >> ~/.bashrc
     echo 'export DANBOORU_API_KEY="api-key-here"' >> ~/.bashrc
     ```
+
+ - Add this snippet to ~/.bash_profile
+
+   ```sh
+   echo "if [ -f ~/.bashrc ]; then
+	. ~/.bashrc
+    fi" >> ~/.bash_profile
+   ```
+
+ - Assuming you're at least Gold-level, check your environmental variables and
+   search for more than 2 tags
+
+   ```sh
+   # Check environmental variables
+   printenv | grep -E '(DANBOORU_USERNAME|DANBOORU_API_KEY)' 
+   # If configured properly, you should be allowed to search more than 2 tags
+   show-waifu dan --safe --tags="when_the_imposter_is_sus_(meme) cat_boy cat_paws cat_ears 1boy chartags:1"
+   ```
 
 ## Example usage
 
@@ -118,11 +136,15 @@ FLAGS:
     -V, --version         Prints version information
 
 OPTIONS:
-    -k, --key <key>              Set your Danbooru API key for authentication
+    -k, --key <key>              Pass your Danbooru API key for authentication. NOTE: This doesn't
+                                 set a persistent environmental variable and instead only works for
+                                 one session
     -t, --tags <tags>            Search for an image based on Danbooru tags. Pass as a string
                                  separated by spaces or commas. Look at Danbooru's cheatsheet for a
                                  full list of search options
-    -u, --username <username>    Set your Danbooru username for authentication
+    -u, --username <username>    Pass your Danbooru username for authentication. NOTE: This doesn't
+                                 set a persistent environmental variable and instead only works for
+                                 one session
 ```
 
 #### safe (subcommand)
