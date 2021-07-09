@@ -1,18 +1,18 @@
 # show-waifu
 
-A command-line app using the Safebooru API to show SFW-ish anime fanart in your terminal.
+A command-line app using the Safebooru + Danbooru API to show anime fanart in your terminal.
 
 ![Using the CLI app to show an anime girl in a terminal](assets/showcase.gif)
 
 ## Installation
 
-Download `show-waifu-0.2.0.tar.gz` from releases and extract it using
+Download `show-waifu-1.0.0.tar.gz` from releases and extract it using
 either a GUI or the command line.
 
 If you're using the command line run
 
 ```sh
-tar -xf show-waifu-0.1.0.tar.gz
+tar -xf show-waifu-1.0.0.tar.gz
 ```
 
 Move the `show-waifu` executable into your bin
@@ -43,7 +43,24 @@ Test it again and if it works, you're all set to use it!
 show-waifu
 ```
 
-### Example usage
+## Danbooru Authentication
+
+Depending on your account level, authenticating comes with benefits. If you
+have a Danbooru account that is Gold-level or above (see [Danbooru User levels](https://danbooru.donmai.us/wiki_pages/help:users) for 
+more information), you can authenticate by doing the following:
+
+ - Go to your [user profile](https://danbooru.donmai.us/profile) and generate an
+   API key by clicking the "Generate API key button"
+
+ - Create 2 environmental variables `DANBOORU_USERNAME` and `DANBOORU_API_KEY`
+   and add it to ~/.bashrc
+
+    ```sh
+    echo 'export DANBOORU_USERNAME="your-name-here"' >> ~/.bashrc
+    echo 'export DANBOORU_API_KEY="api-key-here"' >> ~/.bashrc
+    ```
+
+## Example usage
 
 Read from stdin and show an image
 
@@ -51,10 +68,10 @@ Read from stdin and show an image
 curl -s https://pbs.twimg.com/media/DoWo3unU4AA2etL\?format\=jpg\&name\=large | show-waifu
 ```
 
-Search for a specific image based on tags, and print details
+Search for a specific image on Safebooru based on tags, and print details
 
 ```sh
-show-waifu random --details --tags="ncr_veteran_ranger night~"
+show-waifu safe --details --tags="ncr_veteran_ranger night~"
 ```
 
 Use a local file and change its height for viewing
@@ -78,23 +95,47 @@ OPTIONS:
     -w, --width <width>      Resize the image to a provided width
 
 SUBCOMMANDS:
-    file      View an image from your file system
-    help      Prints this message or the help of the given subcommand(s)
-    random    View a random image from Safebooru
-    url       View an image from a url
+    dan     Look at random images from Danbooru
+    file    View an image from your file system
+    help    Prints this message or the help of the given subcommand(s)
+    safe    Look at random images from Safebooru
+    url     View an image from a url
 ```
 
-#### random (subcommand)
+#### dan (subcommand)
 
 ```
 USAGE:
-    show-waifu random [FLAGS] [OPTIONS]
+    show-waifu dan [FLAGS] [OPTIONS]
 
 FLAGS:
-    -d, --details       Show data related to image (url, rating, width, height, tags)
-    -h, --help          Prints help information
-    -s, --suggestive    Only display images with suggestive content
-    -V, --version       Prints version information
+    -d, --details         Show data related to image (artist, source, character, url, rating,
+                          dimensions, tags)
+    -e, --explicit        Only display images with explicit sexual content
+    -h, --help            Prints help information
+    -q, --questionable    Only display images with some nudity or sexual content
+    -s, --safe            Only display images lacking sexual content
+    -V, --version         Prints version information
+
+OPTIONS:
+    -k, --key <key>              Set your Danbooru API key for authentication
+    -t, --tags <tags>            Search for an image based on Danbooru tags. Pass as a string
+                                 separated by spaces or commas. Look at Danbooru's cheatsheet for a
+                                 full list of search options
+    -u, --username <username>    Set your Danbooru username for authentication
+```
+
+#### safe (subcommand)
+
+```
+USAGE:
+    show-waifu safe [FLAGS] [OPTIONS]
+
+FLAGS:
+    -d, --details         Show data related to image (url, rating, dimensions, tags)
+    -h, --help            Prints help information
+    -q, --questionable    Only display images with suggestive content
+    -V, --version         Prints version information
 
 OPTIONS:
     -t, --tags <tags>    Search for an image based on Safebooru tags. Pass as a string separated by
