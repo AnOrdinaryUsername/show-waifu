@@ -1,5 +1,7 @@
 use colored::Colorize;
-use reqwest::Error;
+use reqwest::{StatusCode};
+use std::error::Error;
+use std::fmt;
 use serde::Deserialize;
 
 use crate::api::reformat_search_tags;
@@ -15,8 +17,12 @@ pub fn grab_random_image(args: Danbooru) -> String {
         }
     };
 
-    let image = &data[0];
-    let image_url = &data[0].file_url;
+    let valid_data: Vec<&ImageData> = data
+        .iter()
+        .filter(|image| !image.file_url.is_empty())
+        .collect();
+    let image = &valid_data[0];
+    let image_url = &valid_data[0].file_url;
 
     if args.details {
         match print_image_details(image) {
@@ -61,11 +67,11 @@ fn evaluate_arguments(args: &Danbooru) -> String {
 
     if let Some(username) = &args.username {
         if let Some(api_key) = &args.key {
-            let login_info = format!("?login={}&api_key={}", username, api_key);
+            let login_info = format!("&login={}&api_key={}", username, api_key);
             api.push_str(login_info.as_str());
         }
     } else if let (Some(username), Some(api_key)) = check_env_variables() {
-        let login_info = format!("?login={}&api_key={}", username, api_key);
+        let login_info = format!("&login={}&api_key={}", username, api_key);
         api.push_str(login_info.as_str());
     }
 
@@ -102,7 +108,18 @@ fn evaluate_arguments(args: &Danbooru) -> String {
 #[derive(Deserialize, Debug)]
 struct ImageData {
     source: String,
+    pixiv_id: Option<u32>,
+
+    /*
+     * file_url can potentially not be present under certain conditions
+     * (e.g. banned artists and censored tags for users below Gold account).
+     *
+     * When not present, it returns an empty string due to Default::default().
+     * https://serde.rs/field-attrs.html#default
+     */
+    #[serde(default)]
     file_url: String,
+
     tag_string_character: String,
     tag_string_artist: String,
     rating: char,
@@ -111,9 +128,47 @@ struct ImageData {
     tag_string: String,
 }
 
-fn fetch_api_data(url: String) -> Result<Vec<ImageData>, Error> {
+#[derive(Deserialize, Debug)]
+struct FailureResponse {
+    message: String,
+}
+
+#[derive(Debug)]
+struct ResponseError(String);
+
+impl fmt::Display for ResponseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Error for ResponseError {}
+
+fn fetch_api_data(url: String) -> Result<Vec<ImageData>, Box<dyn Error>> {
     let response = reqwest::blocking::get(&url)?;
+    let status_code = &response.status().to_string();
+
+    match response.status() {
+        StatusCode::OK => (),
+        StatusCode::NO_CONTENT => {
+            let message = format!("{}: Request succeeded, but it contains no content.", status_code.yellow());
+            return Err(Box::new(ResponseError(message.into())));
+        },
+        _ => {
+            let data: FailureResponse = response.json()?;
+            let message = format!("{}: {}", &status_code.red(), data.message);
+            return Err(Box::new(ResponseError(message.into())));
+        }
+    }
+
     let data: Vec<ImageData> = response.json()?;
+
+    if data.is_empty() {
+        let message = format!("{}: Although the request succeeded, \
+                            there is no images associated with your tags.",
+                            status_code.green());
+        return Err(Box::new(ResponseError(message.into())));
+    }
 
     Ok(data)
 }
@@ -123,6 +178,7 @@ fn print_image_details(info: &ImageData) -> Result<(), Box<dyn std::error::Error
 
     let ImageData {
         source,
+        pixiv_id,
         file_url,
         tag_string_character,
         tag_string_artist,
@@ -141,7 +197,20 @@ fn print_image_details(info: &ImageData) -> Result<(), Box<dyn std::error::Error
     }
 
     if !source.is_empty() {
-        println!("{title}: {}", source, title = "Source".red());
+        // source sometimes contains a direct link to pixiv images, and if
+        // you click on them it gives a 403 Forbidden
+        if source.contains("pixiv") || source.contains("pximg") {
+            let id = match pixiv_id {
+                Some(id) => id,
+                None => unreachable!(),
+            };
+            
+            let pixiv_source = format!("https://pixiv.net/en/artworks/{}", id);
+
+            println!("{title}: {}", pixiv_source, title = "Source".red());
+        } else {
+            println!("{title}: {}", source, title = "Source".red());
+        }
     }
 
     if !tag_string_artist.is_empty() {
