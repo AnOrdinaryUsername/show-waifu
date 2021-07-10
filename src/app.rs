@@ -5,18 +5,7 @@ use std::path::PathBuf;
 use viuer::{print, print_from_file};
 
 #[derive(Clap, Debug)]
-#[clap(about = "View random anime fanart in your terminal!
-
-    ┏━━ Rating Colors ━━━━━━┓
-    ┃                       ┃  
-    ┃ safe = \x1b[0;36mcyan\x1b[0m           ┃ 
-    ┃ questionable = \x1b[0;33myellow\x1b[0m ┃
-    ┃ explicit = \x1b[0;31mred\x1b[0m        ┃   
-    ┃                       ┃   
-    ┗━━━━━━━━━━━━━━━━━━━━━━━┛
-    
-NOTE: Each rating has a different meaning depending on site. See
-the respective subcommand's help for more details.")]
+#[clap(about = "View random anime fanart in your terminal")]
 struct Cli {
     /// Resize the image to a provided height
     #[clap(short, long)]
@@ -70,11 +59,13 @@ pub struct Danbooru {
     #[clap(short, long)]
     pub details: bool,
 
-    /// Only display images lacking sexual content
+    /// Only display images lacking sexual content. Includes lingerie,
+    /// swimsuits, innocent romance, etc. NOTE: this doesn't mean "safe
+    /// for work."
     #[clap(short, long)]
     pub safe: bool,
 
-    /// Only display images with some nudity or sexual content
+    /// Only display images with some nox-explicit nudity or sexual content
     #[clap(short, long)]
     pub questionable: bool,
 
@@ -88,11 +79,15 @@ pub struct Danbooru {
     #[clap(short, long)]
     pub tags: Option<String>,
 
-    /// Set your Danbooru username for authentication
+    /// Pass your Danbooru username for authentication.
+    /// NOTE: This doesn't set a persistent environmental variable and
+    /// instead only works for one session
     #[clap(short, long, requires("key"))]
     pub username: Option<String>,
 
-    /// Set your Danbooru API key for authentication
+    /// Pass your Danbooru API key for authentication.
+    /// NOTE: This doesn't set a persistent environmental variable and
+    /// instead only works for one session
     #[clap(short, long, requires("username"))]
     pub key: Option<String>,
 }
