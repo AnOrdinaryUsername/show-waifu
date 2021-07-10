@@ -1,8 +1,8 @@
 use colored::Colorize;
-use reqwest::{StatusCode};
+use reqwest::StatusCode;
+use serde::Deserialize;
 use std::error::Error;
 use std::fmt;
-use serde::Deserialize;
 
 use crate::api::reformat_search_tags;
 use crate::app::Danbooru;
@@ -112,7 +112,7 @@ struct ImageData {
 
     /*
      * file_url can potentially not be present under certain conditions
-     * (e.g. banned artists and censored tags for users below Gold account).
+     * (e.g. banned artists and censored tags for users below Gold-level).
      *
      * When not present, it returns an empty string due to Default::default().
      * https://serde.rs/field-attrs.html#default
@@ -151,23 +151,28 @@ fn fetch_api_data(url: String) -> Result<Vec<ImageData>, Box<dyn Error>> {
     match response.status() {
         StatusCode::OK => (),
         StatusCode::NO_CONTENT => {
-            let message = format!("{}: Request succeeded, but it contains no content.", status_code.yellow());
-            return Err(Box::new(ResponseError(message.into())));
-        },
+            let message = format!(
+                "{}: Request succeeded, but it contains no content.",
+                status_code.yellow()
+            );
+            return Err(Box::new(ResponseError(message)));
+        }
         _ => {
             let data: FailureResponse = response.json()?;
             let message = format!("{}: {}", &status_code.red(), data.message);
-            return Err(Box::new(ResponseError(message.into())));
+            return Err(Box::new(ResponseError(message)));
         }
     }
 
     let data: Vec<ImageData> = response.json()?;
 
     if data.is_empty() {
-        let message = format!("{}: Although the request succeeded, \
-                            there is no images associated with your tags.",
-                            status_code.green());
-        return Err(Box::new(ResponseError(message.into())));
+        let message = format!(
+            "{}: Although the request succeeded, \
+            there is no images associated with your tags.",
+            status_code.green()
+        );
+        return Err(Box::new(ResponseError(message)));
     }
 
     Ok(data)
@@ -190,9 +195,9 @@ fn print_image_details(info: &ImageData) -> Result<(), Box<dyn std::error::Error
 
     if !tag_string_character.is_empty() {
         println!(
-            "{title}: {}",
+            "✨ {title}: {}",
             tag_string_character,
-            title = "Character".red()
+            title = "Character".purple()
         );
     }
 
@@ -204,31 +209,35 @@ fn print_image_details(info: &ImageData) -> Result<(), Box<dyn std::error::Error
                 Some(id) => id,
                 None => unreachable!(),
             };
-            
+
             let pixiv_source = format!("https://pixiv.net/en/artworks/{}", id);
 
-            println!("{title}: {}", pixiv_source, title = "Source".red());
+            println!("ℹ️ {title}: {}", pixiv_source, title = "Source".purple());
         } else {
-            println!("{title}: {}", source, title = "Source".red());
+            println!("ℹ️ {title}: {}", source, title = "Source".purple());
         }
     }
 
     if !tag_string_artist.is_empty() {
-        println!("{title}: {}", tag_string_artist, title = "Artist".red());
+        println!(
+            "🎨 {title}: {}",
+            tag_string_artist,
+            title = "Artist".purple()
+        );
     }
 
-    println!("{title}: {}", file_url, title = "Link".red());
+    println!("✉️ {title}: {}", file_url, title = "Link".purple());
 
     match rating {
-        's' => println!("{title}: safe", title = "Rating".red()),
-        'q' => println!("{title}: questionable", title = "Rating".red()),
-        'e' => println!("{title}: explicit", title = "Rating".red()),
+        's' => println!("⚖️ {title}: safe", title = "Rating".purple()),
+        'q' => println!("⚖️ {title}: questionable", title = "Rating".purple()),
+        'e' => println!("⚖️ {title}: explicit", title = "Rating".purple()),
         _ => (),
     }
 
     println!(
-        "{title}: {w} x {h}",
-        title = "Dimensions".red(),
+        "📐 {title}: {w} x {h}",
+        title = "Dimensions".purple(),
         w = image_width,
         h = image_height
     );
@@ -238,7 +247,7 @@ fn print_image_details(info: &ImageData) -> Result<(), Box<dyn std::error::Error
     let lock = stdout.lock();
     let mut buffer = io::BufWriter::new(lock);
 
-    write!(buffer, "🏷️ {}:", "Tags".red())?;
+    write!(buffer, "🏷️ {}:", "Tags".purple())?;
     tags.iter().try_for_each(|tag| write!(buffer, " {}", tag))?;
 
     writeln!(buffer)?;
