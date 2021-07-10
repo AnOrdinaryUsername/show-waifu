@@ -43,14 +43,76 @@ Test it again and if it works, you're all set to use it!
 show-waifu
 ```
 
-## Danbooru Authentication
+## Safebooru vs Danbooru
 
-Depending on your account level, authenticating comes with certain benefits. If you
-have a Danbooru account that is Gold-level or above (see [Danbooru User levels](https://danbooru.donmai.us/wiki_pages/help:users) for 
-more information), you can authenticate by doing the following:
+<table>
+  <tbody>
+    <tr>
+      <th></th>
+      <th align="center">Safebooru</th>
+      <th align="center">Danbooru</th>
+    </tr>
+    <tr>
+      <th>Safe for work</th>
+      <td align="center">Fairly safe</td>
+      <td align="center">Not really safe</td>
+    </tr>
+    <tr>
+      <th>Searching</th>
+      <td align="left">
+      	<ul>
+          <li>Basic amount of options</li>
+          <li>Has no tag limit</li>
+        </ul>
+      </td>
+      <td align="left">
+      	<ul>
+          <li>Large variety of options</li>
+          <li>Has a tag limit depending on level</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <th>Image details</th>
+      <td align="left">
+      	<ul>
+          <li>Link</li>
+          <li>Rating</li>
+          <li>Dimensions</li>
+          <li>Tags</li>
+        </ul>
+      </td>
+      <td align="left">
+      	<ul>
+          <li>Character</li>
+          <li>Source</li>
+          <li>Artist</li>
+          <li>Link</li>
+          <li>Rating</li>
+          <li>Dimensions</li>
+          <li>Tags</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+More details can be found below
+
+Searching: [Safebooru's cheatsheet](https://safebooru.org/index.php?page=help&topic=cheatsheet) + [Danbooru's cheatsheet](https://danbooru.donmai.us/wiki_pages/help:cheatsheet)
+
+Image ratings: [Safebooru's image ratings](https://safebooru.org/index.php?page=help&topic=rating) + [Danbooru's image ratings](https://danbooru.donmai.us/wiki_pages/howto:rate) 
+
+### Danbooru Authentication
+
+**For Anonymous and Member-level users, authentication provides no benefits.**
+
+Depending on your account level, authenticating comes with some benefits: an 
+increased tag limit and a longer search timemout length. You can authenticate
+by doing the following:
 
  - Go to your [user profile](https://danbooru.donmai.us/profile) and generate an
-   API key by clicking the "Generate API key button"
+   API key by clicking the "Generate API key" button
 
  - Create 2 environmental variables `DANBOORU_USERNAME` and `DANBOORU_API_KEY`
    and add it to ~/.bashrc
@@ -68,14 +130,14 @@ more information), you can authenticate by doing the following:
     fi" >> ~/.bash_profile
    ```
 
- - Assuming you're at least Gold-level, check your environmental variables and
-   search for more than 2 tags
+ - Check your environmental variables and search for more than 2 tags to verify
+   it works
 
    ```sh
-   # Check environmental variables
+   # Check environmental variables. Both environmental variables should pop-up
    printenv | grep -E '(DANBOORU_USERNAME|DANBOORU_API_KEY)' 
    # If configured properly, you should be allowed to search more than 2 tags
-   show-waifu dan --safe --tags="when_the_imposter_is_sus_(meme) cat_boy cat_paws cat_ears 1boy chartags:1"
+   show-waifu dan --safe --tags="when_the_imposter_is_sus_(meme) jerma985 cat_boy cat_paws cat_ears chartags:1"
    ```
 
 ## Example usage
@@ -131,8 +193,9 @@ FLAGS:
                           dimensions, tags)
     -e, --explicit        Only display images with explicit sexual content
     -h, --help            Prints help information
-    -q, --questionable    Only display images with some nudity or sexual content
-    -s, --safe            Only display images lacking sexual content
+    -q, --questionable    Only display images with some nox-explicit nudity or sexual content
+    -s, --safe            Only display images lacking sexual content. Includes lingerie, swimsuits,
+                          innocent romance, etc. NOTE: this doesn't mean "safe for work."
     -V, --version         Prints version information
 
 OPTIONS:
