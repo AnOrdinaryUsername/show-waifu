@@ -43,6 +43,16 @@ Test it again and if it works, you're all set to use it!
 show-waifu
 ```
 
+### Cargo
+
+Using Rust's package manager, Cargo, all you have to do is run
+
+```sh
+cargo install show-waifu
+```
+
+If you're not a Rust programmer, [install Rust](https://www.rust-lang.org/tools/install) to use Cargo
+
 ## Safebooru vs Danbooru
 
 <table>
@@ -101,44 +111,44 @@ More details can be found below
 
 Searching: [Safebooru's cheatsheet](https://safebooru.org/index.php?page=help&topic=cheatsheet) + [Danbooru's cheatsheet](https://danbooru.donmai.us/wiki_pages/help:cheatsheet)
 
-Image ratings: [Safebooru's image ratings](https://safebooru.org/index.php?page=help&topic=rating) + [Danbooru's image ratings](https://danbooru.donmai.us/wiki_pages/howto:rate) 
+Image ratings: [Safebooru's image ratings](https://safebooru.org/index.php?page=help&topic=rating) + [Danbooru's image ratings](https://danbooru.donmai.us/wiki_pages/howto:rate)
 
 ### Danbooru Authentication
 
 **For Anonymous and Member-level users, authentication provides no benefits.**
 
-Depending on your account level, authenticating comes with some benefits: an 
-increased tag limit and a longer search timemout length. You can authenticate
+Depending on your account level, authenticating comes with some benefits: an
+increased tag limit and a longer search timeout. You can authenticate
 by doing the following:
 
- - Go to your [user profile](https://danbooru.donmai.us/profile) and generate an
-   API key by clicking the "Generate API key" button
+- Go to your [user profile](https://danbooru.donmai.us/profile) and generate an
+  API key by clicking the "Generate API key" button
 
- - Create 2 environmental variables `DANBOORU_USERNAME` and `DANBOORU_API_KEY`
-   and add it to ~/.bashrc
+- Create 2 environmental variables `DANBOORU_USERNAME` and `DANBOORU_API_KEY`
+  and add it to ~/.bashrc
 
-    ```sh
-    echo 'export DANBOORU_USERNAME="your-name-here"' >> ~/.bashrc
-    echo 'export DANBOORU_API_KEY="api-key-here"' >> ~/.bashrc
-    ```
+  ```sh
+  echo 'export DANBOORU_USERNAME="your-name-here"' >> ~/.bashrc
+  echo 'export DANBOORU_API_KEY="api-key-here"' >> ~/.bashrc
+  ```
 
- - Add this snippet to ~/.bash_profile
+- Add this snippet to ~/.bash_profile
 
-   ```sh
-   echo "if [ -f ~/.bashrc ]; then
-	. ~/.bashrc
-    fi" >> ~/.bash_profile
-   ```
+  ```sh
+  echo "if [ -f ~/.bashrc ]; then
+  . ~/.bashrc
+   fi" >> ~/.bash_profile
+  ```
 
- - Check your environmental variables and search for more than 2 tags to verify
-   it works
+- Check your environmental variables and search for more than 2 tags to verify
+  it works
 
-   ```sh
-   # Check environmental variables. Both environmental variables should pop-up
-   printenv | grep -E '(DANBOORU_USERNAME|DANBOORU_API_KEY)' 
-   # If configured properly, you should be allowed to search more than 2 tags
-   show-waifu dan --safe --tags="when_the_imposter_is_sus_(meme) jerma985 cat_boy cat_paws cat_ears chartags:1"
-   ```
+  ```sh
+  # Check environmental variables. Both environmental variables should pop-up
+  printenv | grep -E '(DANBOORU_USERNAME|DANBOORU_API_KEY)'
+  # If configured properly, you should be allowed to search more than 2 tags
+  show-waifu dan --safe --tags="when_the_imposter_is_sus_(meme) jerma985 cat_boy cat_paws cat_ears chartags:1"
+  ```
 
 ## Example usage
 
