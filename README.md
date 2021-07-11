@@ -1,18 +1,18 @@
 # show-waifu
 
-A command-line app using the Safebooru + Danbooru API to show anime fanart in your terminal.
+A command-line app using the Safebooru + Danbooru API to display anime fanart in your terminal.
 
 ![Using the CLI app to show an anime girl in a terminal](assets/showcase.gif)
 
 ## Installation
 
-Download `show-waifu-1.0.0.tar.gz` from releases and extract it using
+Download `show-waifu-1.0.1.tar.gz` from releases and extract it using
 either a GUI or the command line.
 
 If you're using the command line run
 
 ```sh
-tar -xf show-waifu-1.0.0.tar.gz
+tar -xf show-waifu-1.0.1.tar.gz
 ```
 
 Move the `show-waifu` executable into your bin
@@ -30,14 +30,14 @@ Test it to see if it works, it should output an image in your terminal
 ```
 
 To make `show-waifu` available everywhere on the command line,
-add ~/bin to $PATH and reload the Bash configuration
+add `~/bin/` to $PATH and reload the Bash configuration
 
 ```sh
 echo 'export PATH=~/bin:$PATH' >> ~/.bash_profile
 source ~/.bash_profile
 ```
 
-Test it again and if it works, you're all set to use it!
+Test it again, this time without `~/bin/`. If it works, you're all set to use it!
 
 ```sh
 show-waifu
@@ -109,23 +109,26 @@ If you're not a Rust programmer, [install Rust](https://www.rust-lang.org/tools/
 
 More details can be found below
 
-Searching: [Safebooru's cheatsheet](https://safebooru.org/index.php?page=help&topic=cheatsheet) + [Danbooru's cheatsheet](https://danbooru.donmai.us/wiki_pages/help:cheatsheet)
+Searching: [Safebooru's cheatsheet](https://safebooru.org/index.php?page=help&topic=cheatsheet) | [Danbooru's cheatsheet](https://danbooru.donmai.us/wiki_pages/help:cheatsheet)
 
-Image ratings: [Safebooru's image ratings](https://safebooru.org/index.php?page=help&topic=rating) + [Danbooru's image ratings](https://danbooru.donmai.us/wiki_pages/howto:rate)
+Image ratings: [Safebooru's image ratings](https://safebooru.org/index.php?page=help&topic=rating) | [Danbooru's image ratings](https://danbooru.donmai.us/wiki_pages/howto:rate)
 
 ### Danbooru Authentication
 
 **For Anonymous and Member-level users, authentication provides no benefits.**
 
-Depending on your account level, authenticating comes with some benefits: an
-increased tag limit and a longer search timeout. You can authenticate
-by doing the following:
+Normally, using the `dan` subcommand limits searches to up to 2 tags. You can bypass
+this by authenticating with a Gold-level Danbooru account or above.
+
+> Gold and Platinum cost money, $20 and $40 respectively, but contributions to the community also award higher levels. See [Danbooru help:users](https://danbooru.donmai.us/wiki_pages/help%3Ausers) for more information.
+
+You can authenticate by doing the following:
 
 - Go to your [user profile](https://danbooru.donmai.us/profile) and generate an
   API key by clicking the "Generate API key" button
 
-- Create 2 environmental variables `DANBOORU_USERNAME` and `DANBOORU_API_KEY`
-  and add it to ~/.bashrc
+- Create 2 environmental variables named `DANBOORU_USERNAME` and `DANBOORU_API_KEY`,
+  then add them to `~/.bashrc`
 
   ```sh
   echo 'export DANBOORU_USERNAME="your-name-here"' >> ~/.bashrc
@@ -140,17 +143,30 @@ by doing the following:
    fi" >> ~/.bash_profile
   ```
 
-- Check your environmental variables and search for more than 2 tags to verify
-  it works
+- Reload the Bash configuration
 
   ```sh
-  # Check environmental variables. Both environmental variables should pop-up
+  source ~/.bash_profile
+  ```
+
+- Check environmental variables for your API key and username. After that, make a search
+  with more than 2 tags to verify its functional
+
+  ```sh
+  # Both environmental variables should pop-up
   printenv | grep -E '(DANBOORU_USERNAME|DANBOORU_API_KEY)'
-  # If configured properly, you should be allowed to search more than 2 tags
+
+  # Search with more than 2 tags
   show-waifu dan --safe --tags="when_the_imposter_is_sus_(meme) jerma985 cat_boy cat_paws cat_ears chartags:1"
   ```
 
-## Example usage
+## Example
+
+Grab a random image from the first page of Safebooru
+
+```sh
+show-waifu
+```
 
 Read from stdin and show an image
 
@@ -164,7 +180,7 @@ Search for a specific image on Safebooru based on tags, and print details
 show-waifu safe --details --tags="ncr_veteran_ranger night~"
 ```
 
-Use a local file and change its height for viewing
+Change a local file's height for viewing
 
 ```sh
 show-waifu --height 10 file ~/Pictures/doge.jpg

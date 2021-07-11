@@ -169,7 +169,7 @@ fn fetch_api_data(url: String) -> Result<Vec<ImageData>, Box<dyn Error>> {
     if data.is_empty() {
         let message = format!(
             "{}: Although the request succeeded, \
-            there is no images associated with your tags.",
+            there are no images associated with your tags.",
             status_code.green()
         );
         return Err(Box::new(ResponseError(message)));
